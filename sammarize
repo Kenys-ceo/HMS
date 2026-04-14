@@ -1,0 +1,125 @@
+
+backend-project/
+│
+├── server.js               
+├── package.json
+├── .env                   
+│
+├── src/
+│   ├── config/
+│   │   └── db.js            
+│   │
+│   ├── models/
+│   │   ├── patient.js
+│   │   ├── doctor.js
+│   │   ├── appointment.js
+│   │   ├── invoice.js
+│   │   └── medicalService.js
+│   │
+│   ├── controllers/
+│   │   ├── Auth.js          # login/register logic
+│   │   ├── PatientController.js
+│   │   ├── DoctorController.js
+│   │   ├── AppointmentController.js
+│   │   ├── InvoiceController.js
+│   │   └── ReportController.js
+│   │
+│   ├── routes/
+│   │   ├── Auth.js
+│   │   ├── PatientRoutes.js
+│   │   ├── DoctorRoutes.js
+│   │   ├── AppointmentRoutes.js
+│   │   ├── InvoiceRoutes.js
+│   │   └── ReportRoutes.js
+│   │
+│   └── middleware/
+│       └── auth.js          # JWT authentication & role authorization
+-- Step 1: Create Database
+CREATE DATABASE HMS;
+USE HMS;
+
+-- Step 2: Patient Table
+CREATE TABLE Patient (
+  PatientID INT AUTO_INCREMENT PRIMARY KEY,
+  FirstName VARCHAR(50) NOT NULL,
+  LastName VARCHAR(50) NOT NULL,
+  PhoneNumber VARCHAR(20),
+  DateOfBirth DATE,
+  Address VARCHAR(150)
+);
+
+-- Step 3: Doctor Table
+CREATE TABLE Doctor (
+  DoctorID INT AUTO_INCREMENT PRIMARY KEY,
+  FullName VARCHAR(100) NOT NULL,
+  Specialty VARCHAR(100),
+  PhoneNumber VARCHAR(20),
+  Email VARCHAR(100)
+);
+
+-- Step 4: Appointment Table
+CREATE TABLE Appointment (
+  AppointmentID INT AUTO_INCREMENT PRIMARY KEY,
+  AppointmentDate DATE NOT NULL,
+  AppointmentTime TIME NOT NULL,
+  Status ENUM('Scheduled','Completed','Cancelled') DEFAULT 'Scheduled',
+  Diagnosis TEXT,
+  PatientID INT,
+  DoctorID INT,
+  FOREIGN KEY (PatientID) REFERENCES Patient(PatientID),
+  FOREIGN KEY (DoctorID) REFERENCES Doctor(DoctorID)
+);
+
+-- Step 5: Invoice Table
+CREATE TABLE Invoice (
+  InvoiceNumber INT AUTO_INCREMENT PRIMARY KEY,
+  AppointmentID INT,
+  TotalAmount DECIMAL(10,2) NOT NULL,
+  PaymentDate DATE,
+  PaymentStatus ENUM('Paid','Unpaid','Pending') DEFAULT 'Pending',
+  FOREIGN KEY (AppointmentID) REFERENCES Appointment(AppointmentID)
+);
+
+-- Step 6: MedicalService Table
+CREATE TABLE MedicalService (
+  ServiceID INT AUTO_INCREMENT PRIMARY KEY,
+  ServiceName VARCHAR(100) NOT NULL,
+  ServiceDescription TEXT,
+  Cost DECIMAL(10,2) NOT NULL
+);
+
+-- Step 7: Junction Table (Invoice ↔ MedicalService)
+CREATE TABLE InvoiceService (
+  InvoiceServiceID INT AUTO_INCREMENT PRIMARY KEY,
+  InvoiceNumber INT,
+  ServiceID INT,
+  Quantity INT DEFAULT 1,
+  FOREIGN KEY (InvoiceNumber) REFERENCES Invoice(InvoiceNumber),
+  FOREIGN KEY (ServiceID) REFERENCES MedicalService(ServiceID)
+);
+
+-- Step 8:
+
+SELECT 
+    CONCAT(p.FirstName, ' ', p.LastName) AS PatientName,
+    d.FullName AS DoctorName,
+    a.AppointmentDate,
+    a.Diagnosis,
+    i.TotalAmount AS InvoiceAmount
+FROM Appointment a
+JOIN Patient p ON a.PatientID = p.PatientID
+JOIN Doctor d ON a.DoctorID = d.DoctorID
+JOIN Invoice i ON a.AppointmentID = i.AppointmentID
+WHERE a.AppointmentDate = CURDATE();  -- today's report
+
+SELECT 
+    MONTH(a.AppointmentDate) AS Month,
+    CONCAT(p.FirstName, ' ', p.LastName) AS PatientName,
+    d.FullName AS DoctorName,
+    COUNT(a.AppointmentID) AS TotalAppointments,
+    SUM(i.TotalAmount) AS TotalRevenue
+FROM Appointment a
+JOIN Patient p ON a.PatientID = p.PatientID
+JOIN Doctor d ON a.DoctorID = d.DoctorID
+JOIN Invoice i ON a.AppointmentID = i.AppointmentID
+GROUP BY Month, PatientName, DoctorName;
