@@ -15,21 +15,16 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-
-  try {
-    const res = await api.post("/auth/login", form);
-
-    console.log(res.data); // 👈 ADD THIS
-
-    localStorage.setItem("authToken", res.data.token);
-    window.location.href = "/dashboard";
-  } catch (err) {
-    console.log(err.response?.data); // 👈 SEE ERROR
-    setError(err.response?.data?.message || "Login failed");
-  }
-};
+    e.preventDefault();
+    setError("");
+    try {
+      const res = await api.post("/auth/login", form);
+      localStorage.setItem("authToken", res.data.token);
+      window.location.href = "/dashboard";
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    }
+  };
 
   return (
     <>
@@ -147,9 +142,7 @@ export default function Login() {
           border-radius: 2px;
         }
 
-        .brand-text {
-          flex: 1;
-        }
+        .brand-text { flex: 1; }
 
         .brand-name {
           font-family: 'DM Serif Display', serif;
@@ -213,9 +206,7 @@ export default function Login() {
           letter-spacing: 0.03em;
         }
 
-        .field {
-          margin-bottom: 22px;
-        }
+        .field { margin-bottom: 22px; }
 
         .field-label {
           display: block;
@@ -229,13 +220,9 @@ export default function Login() {
           transition: color 0.2s ease;
         }
 
-        .field.is-focused .field-label {
-          color: #7aaa99;
-        }
+        .field.is-focused .field-label { color: #7aaa99; }
 
-        .input-wrap {
-          position: relative;
-        }
+        .input-wrap { position: relative; }
 
         .field-input {
           width: 100%;
@@ -257,9 +244,7 @@ export default function Login() {
           font-weight: 300;
         }
 
-        .field-input:focus {
-          border-color: #9dc0b3;
-        }
+        .field-input:focus { border-color: #9dc0b3; }
 
         .field-line {
           position: absolute;
@@ -271,9 +256,7 @@ export default function Login() {
           transition: width 0.3s ease;
         }
 
-        .field.is-focused .field-line {
-          width: 100%;
-        }
+        .field.is-focused .field-line { width: 100%; }
 
         .submit-btn {
           width: 100%;
@@ -310,13 +293,8 @@ export default function Login() {
           transform: translateY(-1px);
         }
 
-        .submit-btn:hover::before {
-          left: 100%;
-        }
-
-        .submit-btn:active {
-          transform: translateY(0);
-        }
+        .submit-btn:hover::before { left: 100%; }
+        .submit-btn:active { transform: translateY(0); }
 
         .footer-note {
           margin-top: 28px;
