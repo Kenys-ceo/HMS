@@ -8,15 +8,12 @@ export default function Reports() {
   const [mounted, setMounted] = useState(false);
   const [tab, setTab] = useState("daily");
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     setLoading(true);
     setError("");
-    api
-      .get(`/reports/${tab}`)
+    api.get(`/api/reports/${tab}`)
       .then((res) => setReport(res.data))
       .catch(() => setError("Failed to load report data."))
       .finally(() => setLoading(false));
@@ -25,184 +22,48 @@ export default function Reports() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap');
+        *, *::before, *::after { box-sizing: border-box; }
 
-        .report-card {
-          width: 100%;
-          background: rgba(255, 252, 248, 0.92);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(196, 184, 154, 0.35);
-          border-radius: 4px;
-          padding: 40px;
-          box-shadow:
-            0 2px 4px rgba(80, 60, 30, 0.04),
-            0 8px 24px rgba(80, 60, 30, 0.07),
-            0 32px 64px rgba(80, 60, 30, 0.08);
-          opacity: 0;
-          transform: translateY(20px);
-          transition: all 0.6s ease;
-          position: relative;
-        }
+        .report-card { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 44px 52px; font-family: 'Space Mono', monospace; opacity: 0; transform: translateY(20px); transition: all 0.6s ease; position: relative; }
+        .report-card::after { content: ''; position: absolute; top: 0; left: 52px; right: 52px; height: 2px; background: linear-gradient(90deg, transparent, #00c87a, transparent); }
+        .report-card.mounted { opacity: 1; transform: translateY(0); }
 
-        .report-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 40px;
-          right: 40px;
-          height: 2px;
-          background: linear-gradient(90deg, transparent, #9dc0b3, #c4a87a, transparent);
-        }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; flex-wrap: wrap; gap: 16px; }
 
-        .report-card.mounted {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        .title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
 
-        .header {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          margin-bottom: 28px;
-          flex-wrap: wrap;
-          gap: 16px;
-        }
+        .tabs { display: flex; gap: 6px; }
 
-        .title {
-          font-family: 'DM Serif Display', serif;
-          font-size: 26px;
-          color: #1e1a12;
-          margin: 0;
-        }
+        .tab-btn { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; padding: 8px 20px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(255,255,255,0.3); cursor: pointer; border-radius: 3px; transition: all 0.2s ease; }
+        .tab-btn.active { background: #00c87a; color: #0a0c0f; border-color: #00c87a; }
+        .tab-btn:hover:not(.active) { border-color: rgba(0,200,122,0.4); color: rgba(255,255,255,0.7); }
 
-        .tabs {
-          display: flex;
-          gap: 4px;
-        }
+        .error-box { background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.25); border-left: 3px solid #dc3c3c; padding: 12px 16px; border-radius: 3px; font-size: 11px; color: #e07070; margin-bottom: 24px; }
 
-        .tab-btn {
-          font-family: 'DM Mono', monospace;
-          font-size: 9px;
-          font-weight: 500;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          padding: 7px 16px;
-          border: 1px solid #d8cfc0;
-          background: transparent;
-          color: #9c8f78;
-          cursor: pointer;
-          border-radius: 2px;
-          transition: all 0.2s ease;
-        }
+        .loading, .empty { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 0.12em; text-align: center; padding: 60px 0; }
 
-        .tab-btn.active {
-          background: #1e1a12;
-          color: #f5f2ee;
-          border-color: #1e1a12;
-        }
+        .table-wrap { overflow-x: auto; }
 
-        .tab-btn:hover:not(.active) {
-          background: #f0ebe5;
-          border-color: #9dc0b3;
-        }
+        .table { width: 100%; border-collapse: collapse; }
 
-        .error-box {
-          background: rgba(220, 80, 60, 0.06);
-          border: 1px solid rgba(220, 80, 60, 0.2);
-          border-left: 3px solid #dc503c;
-          padding: 10px 14px;
-          border-radius: 2px;
-          font-family: 'DM Mono', monospace;
-          font-size: 11px;
-          color: #a83020;
-          margin-bottom: 20px;
-        }
+        .table th { font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); text-align: left; white-space: nowrap; }
 
-        .loading {
-          font-family: 'DM Mono', monospace;
-          font-size: 11px;
-          color: #9c8f78;
-          letter-spacing: 0.12em;
-          text-align: center;
-          padding: 40px 0;
-        }
+        .table td { font-size: 12px; color: rgba(255,255,255,0.7); padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); letter-spacing: 0.02em; }
 
-        .table-wrap {
-          overflow-x: auto;
-        }
+        .table tbody tr { transition: background 0.15s ease; }
+        .table tbody tr:hover { background: rgba(255,255,255,0.03); }
+        .table tbody tr:last-child td { border-bottom: none; }
 
-        .table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        .table th {
-          font-family: 'DM Mono', monospace;
-          font-size: 9px;
-          font-weight: 500;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: #9c8f78;
-          padding: 10px 14px;
-          border-bottom: 1.5px solid #d8cfc0;
-          text-align: left;
-          white-space: nowrap;
-        }
-
-        .table td {
-          font-family: 'DM Mono', monospace;
-          font-size: 12px;
-          color: #3a3020;
-          padding: 12px 14px;
-          border-bottom: 1px solid #ede8e0;
-          letter-spacing: 0.02em;
-        }
-
-        .table tbody tr {
-          transition: background 0.15s ease;
-        }
-
-        .table tbody tr:hover {
-          background: #f5f0ea;
-        }
-
-        .table tbody tr:last-child td {
-          border-bottom: none;
-        }
-
-        .amount {
-          font-weight: 500;
-          color: #5a9a87;
-        }
-
-        .empty {
-          font-family: 'DM Mono', monospace;
-          font-size: 11px;
-          color: #c4b8a2;
-          letter-spacing: 0.1em;
-          text-align: center;
-          padding: 40px 0;
-        }
+        .amount { color: #00c87a; font-weight: 700; }
       `}</style>
 
       <div className={`report-card ${mounted ? "mounted" : ""}`}>
         <div className="header">
-          <h2 className="title">
-            {tab === "daily" ? "Daily Report" : "Monthly Report"}
-          </h2>
+          <h2 className="title">{tab === "daily" ? "Daily Report" : "Monthly Report"}</h2>
           <div className="tabs">
-            <button
-              className={`tab-btn ${tab === "daily" ? "active" : ""}`}
-              onClick={() => setTab("daily")}
-            >
-              Daily
-            </button>
-            <button
-              className={`tab-btn ${tab === "monthly" ? "active" : ""}`}
-              onClick={() => setTab("monthly")}
-            >
-              Monthly
-            </button>
+            <button className={`tab-btn ${tab === "daily" ? "active" : ""}`} onClick={() => setTab("daily")}>Daily</button>
+            <button className={`tab-btn ${tab === "monthly" ? "active" : ""}`} onClick={() => setTab("monthly")}>Monthly</button>
           </div>
         </div>
 
@@ -233,9 +94,7 @@ export default function Reports() {
                     <td>{row.AppointmentDate || `Month ${row.Month}`}</td>
                     <td>{row.Diagnosis ?? "—"}</td>
                     {tab === "monthly" && <td>{row.TotalAppointments}</td>}
-                    <td className="amount">
-                      ${(row.InvoiceAmount ?? row.TotalRevenue ?? 0).toFixed(2)}
-                    </td>
+                    <td className="amount">${(row.InvoiceAmount ?? row.TotalRevenue ?? 0).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
