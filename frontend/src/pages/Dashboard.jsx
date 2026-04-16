@@ -8,230 +8,258 @@ export default function Dashboard() {
     setMounted(true);
   }, []);
 
+  const modules = [
+    { to: "/patients",     icon: "🧑‍⚕️", label: "Patients",     desc: "Register & manage" },
+    { to: "/doctors",      icon: "👨‍⚕️", label: "Doctors",      desc: "Physician records" },
+    { to: "/appointments", icon: "📅", label: "Appointments", desc: "Schedule & track" },
+    { to: "/invoices",     icon: "💳", label: "Invoices",     desc: "Billing & payments" },
+    { to: "/reports",      icon: "📊", label: "Reports",      desc: "Daily & monthly" },
+  ];
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
-        .dashboard-root {
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .dash-root {
           min-height: 100vh;
+          background: #0a0c0f;
+          font-family: 'Space Mono', monospace;
+          position: relative;
+          overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: #f5f2ee;
-          font-family: 'DM Mono', monospace;
+          padding: 40px 24px;
+        }
+
+        .dash-root::before {
+          content: '';
+          position: absolute;
+          top: -200px;
+          left: -200px;
+          width: 600px;
+          height: 600px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(0,200,130,0.1) 0%, transparent 70%);
+          pointer-events: none;
+        }
+
+        .bg-grid {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(0,200,150,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,200,150,0.03) 1px, transparent 1px);
+          background-size: 48px 48px;
+          pointer-events: none;
+        }
+
+        .dash-card {
           position: relative;
-          overflow: hidden;
-        }
-
-        .dashboard-root::before {
-          content: '';
-          position: absolute;
-          top: -100px;
-          left: -100px;
-          width: 400px;
-          height: 400px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(157, 192, 179, 0.25), transparent 70%);
-        }
-
-        .dashboard-root::after {
-          content: '';
-          position: absolute;
-          bottom: -80px;
-          right: -80px;
-          width: 350px;
-          height: 350px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(196, 168, 134, 0.2), transparent 70%);
-        }
-
-        .dashboard-card {
+          z-index: 1;
           width: 100%;
-          max-width: 900px;
-          background: rgba(255, 252, 248, 0.92);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(196, 184, 154, 0.35);
-          border-radius: 6px;
-          padding: 48px 40px;
-          position: relative;
-          box-shadow:
-            0 2px 4px rgba(80, 60, 30, 0.04),
-            0 8px 24px rgba(80, 60, 30, 0.07),
-            0 32px 64px rgba(80, 60, 30, 0.08);
+          max-width: 1100px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 8px;
+          padding: 56px 64px;
           opacity: 0;
           transform: translateY(20px);
           transition: all 0.6s ease;
         }
 
-        .dashboard-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 40px;
-          right: 40px;
-          height: 2px;
-          background: linear-gradient(90deg, transparent, #9dc0b3, #c4a87a, transparent);
-        }
-
-        .dashboard-card.mounted {
+        .dash-card.mounted {
           opacity: 1;
           transform: translateY(0);
         }
 
-        .brand-mark {
+        .dash-header {
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-bottom: 36px;
-          justify-content: center;
+          justify-content: space-between;
+          margin-bottom: 52px;
+          flex-wrap: wrap;
+          gap: 20px;
         }
 
-        .brand-icon {
-          width: 32px;
-          height: 32px;
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .brand-cross {
+          width: 36px;
+          height: 36px;
           position: relative;
           flex-shrink: 0;
         }
 
-        .cross-h {
-          position: absolute;
-          top: 50%;
-          left: 0;
-          right: 0;
-          height: 9px;
-          background: #9dc0b3;
-          transform: translateY(-50%);
-          border-radius: 2px;
-        }
+        .ch { position: absolute; top: 50%; left: 0; right: 0; height: 10px; background: #00c87a; transform: translateY(-50%); border-radius: 2px; }
+        .cv { position: absolute; left: 50%; top: 0; bottom: 0; width: 10px; background: #00c87a; transform: translateX(-50%); border-radius: 2px; }
 
-        .cross-v {
-          position: absolute;
-          left: 50%;
-          top: 0;
-          bottom: 0;
-          width: 9px;
-          background: #9dc0b3;
-          transform: translateX(-50%);
-          border-radius: 2px;
-        }
-
-        .brand-text { text-align: left; }
-
+        .brand-info {}
         .brand-name {
-          font-family: 'DM Serif Display', serif;
-          font-size: 14px;
-          color: #2c2416;
-          letter-spacing: 0.02em;
-          line-height: 1.2;
+          font-family: 'Syne', sans-serif;
+          font-size: 16px;
+          font-weight: 700;
+          color: #fff;
         }
-
         .brand-sub {
-          font-family: 'DM Mono', monospace;
           font-size: 9px;
-          font-weight: 300;
-          color: #9c8f78;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
+          color: rgba(255,255,255,0.3);
           margin-top: 2px;
         }
 
-        .title {
-          font-family: 'DM Serif Display', serif;
-          font-size: 30px;
-          text-align: center;
-          margin-bottom: 8px;
-          color: #1e1a12;
-        }
-
-        .subtitle {
-          font-family: 'DM Mono', monospace;
+        .status-pill {
           font-size: 9px;
-          font-weight: 300;
-          color: #a89d88;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          text-align: center;
-          margin-bottom: 36px;
+          color: #00c87a;
+          border: 1px solid rgba(0,200,122,0.3);
+          padding: 6px 14px;
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
-        .grid {
+        .status-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #00c87a;
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+
+        .dash-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 42px;
+          font-weight: 800;
+          color: #fff;
+          letter-spacing: -0.02em;
+          margin-bottom: 8px;
+        }
+
+        .dash-sub {
+          font-size: 10px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.25);
+          margin-bottom: 48px;
+        }
+
+        .modules-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
           gap: 16px;
         }
 
-        .card-link {
+        .module-card {
           display: block;
-          padding: 24px 16px;
-          text-align: center;
-          border: 1px solid #d8cfc0;
-          border-radius: 4px;
-          background: transparent;
+          padding: 28px 22px;
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 6px;
+          background: rgba(255,255,255,0.02);
           text-decoration: none;
-          color: #1e1a12;
-          font-family: 'DM Mono', monospace;
-          font-size: 10px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
+          color: #fff;
           transition: all 0.25s ease;
+          position: relative;
+          overflow: hidden;
         }
 
-        .card-link:hover {
-          background: #f0ebe5;
+        .module-card::before {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: #00c87a;
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 0.3s ease;
+        }
+
+        .module-card:hover {
+          border-color: rgba(0,200,122,0.3);
+          background: rgba(0,200,122,0.05);
           transform: translateY(-3px);
-          border-color: #9dc0b3;
-          box-shadow: 0 8px 20px rgba(80, 60, 30, 0.08);
         }
 
-        .icon {
-          font-size: 24px;
-          margin-bottom: 12px;
+        .module-card:hover::before {
+          transform: scaleX(1);
+        }
+
+        .module-icon {
+          font-size: 28px;
+          margin-bottom: 14px;
           display: block;
+        }
+
+        .module-label {
+          font-family: 'Syne', sans-serif;
+          font-size: 14px;
+          font-weight: 700;
+          color: #fff;
+          display: block;
+          margin-bottom: 4px;
+        }
+
+        .module-desc {
+          font-size: 10px;
+          color: rgba(255,255,255,0.3);
+          letter-spacing: 0.06em;
+        }
+
+        @media (max-width: 600px) {
+          .dash-card { padding: 32px 24px; }
+          .dash-title { font-size: 28px; }
+          .modules-grid { grid-template-columns: 1fr 1fr; }
         }
       `}</style>
 
-      <div className="dashboard-root">
-        <div className={`dashboard-card ${mounted ? "mounted" : ""}`}>
-          <div className="brand-mark">
-            <div className="brand-icon">
-              <div className="cross-h" />
-              <div className="cross-v" />
+      <div className="dash-root">
+        <div className="bg-grid" />
+        <div className={`dash-card ${mounted ? "mounted" : ""}`}>
+          <div className="dash-header">
+            <div className="brand">
+              <div className="brand-cross">
+                <div className="ch" />
+                <div className="cv" />
+              </div>
+              <div className="brand-info">
+                <div className="brand-name">MediCore</div>
+                <div className="brand-sub">Hospital Management System</div>
+              </div>
             </div>
-            <div className="brand-text">
-              <div className="brand-name">MediCore</div>
-              <div className="brand-sub">Hospital Management</div>
+            <div className="status-pill">
+              <div className="status-dot" />
+              All systems operational
             </div>
           </div>
 
-          <h1 className="title">Dashboard</h1>
-          <p className="subtitle">Select a module to continue</p>
+          <h1 className="dash-title">Dashboard</h1>
+          <p className="dash-sub">Select a module to continue</p>
 
-          <div className="grid">
-            <Link to="/patients" className="card-link">
-              <span className="icon">🧑‍⚕️</span>
-              Manage Patients
-            </Link>
-
-            <Link to="/doctors" className="card-link">
-              <span className="icon">👨‍⚕️</span>
-              Manage Doctors
-            </Link>
-
-            <Link to="/appointments" className="card-link">
-              <span className="icon">📅</span>
-              Appointments
-            </Link>
-
-            <Link to="/invoices" className="card-link">
-              <span className="icon">💳</span>
-              Manage Invoices
-            </Link>
-
-            <Link to="/reports" className="card-link">
-              <span className="icon">📊</span>
-              View Reports
-            </Link>
+          <div className="modules-grid">
+            {modules.map((m) => (
+              <Link key={m.to} to={m.to} className="module-card">
+                <span className="module-icon">{m.icon}</span>
+                <span className="module-label">{m.label}</span>
+                <span className="module-desc">{m.desc}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
