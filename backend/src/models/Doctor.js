@@ -1,7 +1,7 @@
 // Doctor Model - MySQL Table Schema
 
 const doctorSchema = {
-  tableName: 'doctors',
+  tableName: 'doctor',
   columns: {
     id: {
       type: 'INT',
@@ -81,7 +81,7 @@ const doctorSchema = {
 
 // SQL to create doctors table
 const createDoctorTableSQL = `
-CREATE TABLE IF NOT EXISTS doctors (
+CREATE TABLE IF NOT EXISTS doctor (
   id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
   userId INT NOT NULL,
   firstName VARCHAR(100) NOT NULL,
