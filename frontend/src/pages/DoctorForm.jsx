@@ -2,274 +2,87 @@ import React, { useState, useEffect } from "react";
 import api from "../api";
 
 export default function DoctorForm() {
-  const [form, setForm] = useState({
-    fullName: "",
-    specialty: "",
-    phone: "",
-    email: ""
-  });
-
+  const [form, setForm] = useState({ fullName: "", specialty: "", phone: "", email: "" });
   const [focused, setFocused] = useState("");
   const [mounted, setMounted] = useState(false);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    setLoading(true);
     try {
-      await api.post("/doctors", form);
-      setMessage("Doctor added successfully ✅");
+      await api.post("/api/doctors", form);
+      setMessage("success");
       setForm({ fullName: "", specialty: "", phone: "", email: "" });
     } catch {
-      setMessage("Error adding doctor ❌");
+      setMessage("error");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap');
-
-        .form-card {
-          max-width: 500px;
-          margin: auto;
-          background: rgba(255, 252, 248, 0.92);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(196, 184, 154, 0.35);
-          border-radius: 4px;
-          padding: 48px;
-          box-shadow:
-            0 2px 4px rgba(80, 60, 30, 0.04),
-            0 8px 24px rgba(80, 60, 30, 0.07),
-            0 32px 64px rgba(80, 60, 30, 0.08);
-          opacity: 0;
-          transform: translateY(20px);
-          transition: all 0.6s ease;
-          position: relative;
-        }
-
-        .form-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 48px;
-          right: 48px;
-          height: 2px;
-          background: linear-gradient(90deg, transparent, #9dc0b3, #c4a87a, transparent);
-        }
-
-        .form-card.mounted {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
-        .title {
-          font-family: 'DM Serif Display', serif;
-          font-size: 26px;
-          margin-bottom: 6px;
-          color: #1e1a12;
-          text-align: center;
-        }
-
-        .subtitle {
-          font-family: 'DM Mono', monospace;
-          font-size: 9px;
-          font-weight: 300;
-          color: #a89d88;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          text-align: center;
-          margin-bottom: 32px;
-        }
-
-        .field {
-          margin-bottom: 22px;
-        }
-
-        .field-label {
-          display: block;
-          font-family: 'DM Mono', monospace;
-          font-size: 9px;
-          font-weight: 500;
-          color: #9c8f78;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          margin-bottom: 8px;
-          transition: color 0.2s ease;
-        }
-
-        .field.is-focused .field-label {
-          color: #7aaa99;
-        }
-
-        .input-wrap {
-          position: relative;
-        }
-
-        .field-input {
-          width: 100%;
-          font-family: 'DM Mono', monospace;
-          font-size: 13px;
-          color: #1e1a12;
-          background: transparent;
-          border: none;
-          border-bottom: 1.5px solid #d8cfc0;
-          padding: 8px 0;
-          outline: none;
-          transition: border-color 0.25s ease;
-          letter-spacing: 0.04em;
-        }
-
-        .field-input::placeholder {
-          color: #c4b8a2;
-          font-weight: 300;
-        }
-
-        .field-input:focus {
-          border-color: #9dc0b3;
-        }
-
-        .field-line {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 0;
-          height: 1.5px;
-          background: #9dc0b3;
-          transition: width 0.3s ease;
-        }
-
-        .field.is-focused .field-line {
-          width: 100%;
-        }
-
-        .btn {
-          width: 100%;
-          margin-top: 32px;
-          padding: 13px 24px;
-          background: #1e1a12;
-          color: #f5f2ee;
-          font-family: 'DM Mono', monospace;
-          font-size: 10px;
-          font-weight: 500;
-          letter-spacing: 0.22em;
-          text-transform: uppercase;
-          border: none;
-          border-radius: 2px;
-          cursor: pointer;
-          transition: background 0.25s ease, transform 0.15s ease;
-        }
-
-        .btn:hover {
-          background: #2c2416;
-          transform: translateY(-1px);
-        }
-
-        .btn:active {
-          transform: translateY(0);
-        }
-
-        .message {
-          margin-bottom: 20px;
-          font-family: 'DM Mono', monospace;
-          font-size: 11px;
-          text-align: center;
-          color: #7aaa99;
-          letter-spacing: 0.05em;
-        }
-
-        .message.error {
-          color: #a83020;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap');
+        *, *::before, *::after { box-sizing: border-box; }
+        .form-card { max-width: 620px; margin: auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 52px 56px; font-family: 'Space Mono', monospace; opacity: 0; transform: translateY(20px); transition: all 0.6s ease; position: relative; }
+        .form-card::after { content: ''; position: absolute; top: 0; left: 56px; right: 56px; height: 2px; background: linear-gradient(90deg, transparent, #00c87a, transparent); }
+        .form-card.mounted { opacity: 1; transform: translateY(0); }
+        .title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.02em; }
+        .subtitle { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 36px; }
+        .field { margin-bottom: 24px; }
+        .field-label { display: block; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px; transition: color 0.2s; }
+        .field.is-focused .field-label { color: #00c87a; }
+        .field-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 13px 16px; font-family: 'Space Mono', monospace; font-size: 13px; color: #fff; outline: none; transition: border-color 0.25s, background 0.25s; letter-spacing: 0.03em; }
+        .field-input::placeholder { color: rgba(255,255,255,0.18); }
+        .field-input:focus { border-color: rgba(0,200,122,0.5); background: rgba(0,200,122,0.04); }
+        .msg { padding: 12px 16px; border-radius: 4px; font-size: 11px; letter-spacing: 0.05em; margin-bottom: 24px; }
+        .msg.success { background: rgba(0,200,122,0.08); border: 1px solid rgba(0,200,122,0.25); color: #00c87a; }
+        .msg.error { background: rgba(220,60,60,0.08); border: 1px solid rgba(220,60,60,0.25); color: #e07070; }
+        .btn { width: 100%; margin-top: 12px; padding: 14px 24px; background: #00c87a; color: #0a0c0f; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s, transform 0.15s, opacity 0.2s; }
+        .btn:hover:not(:disabled) { background: #00e88d; transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
       `}</style>
 
       <div className={`form-card ${mounted ? "mounted" : ""}`}>
         <h2 className="title">Add Doctor</h2>
         <p className="subtitle">New physician registration</p>
 
-        {message && (
-          <div className={`message ${message.includes("Error") ? "error" : ""}`}>
-            {message}
-          </div>
-        )}
+        {message === "success" && <div className="msg success">✓ Doctor added successfully</div>}
+        {message === "error"   && <div className="msg error">✗ Error adding doctor — please try again</div>}
 
         <form onSubmit={handleSubmit}>
-          <div className={`field ${focused === "fullName" ? "is-focused" : ""}`}>
-            <label className="field-label">Full Name</label>
-            <div className="input-wrap">
+          {[
+            { name: "fullName",  label: "Full Name",      placeholder: "Dr. Jane Smith",       type: "text"  },
+            { name: "specialty", label: "Specialty",      placeholder: "e.g. Cardiology",      type: "text"  },
+            { name: "phone",     label: "Phone Number",   placeholder: "+1 000 000 0000",      type: "tel"   },
+            { name: "email",     label: "Email Address",  placeholder: "doctor@hospital.com",  type: "email" },
+          ].map(({ name, label, placeholder, type }) => (
+            <div key={name} className={`field ${focused === name ? "is-focused" : ""}`}>
+              <label className="field-label">{label}</label>
               <input
                 className="field-input"
-                name="fullName"
-                value={form.fullName}
+                type={type}
+                name={name}
+                value={form[name]}
                 onChange={handleChange}
-                onFocus={() => setFocused("fullName")}
+                onFocus={() => setFocused(name)}
                 onBlur={() => setFocused("")}
-                placeholder="Dr. Jane Smith"
-                required
+                placeholder={placeholder}
+                required={["fullName", "specialty"].includes(name)}
               />
-              <div className="field-line" />
             </div>
-          </div>
-
-          <div className={`field ${focused === "specialty" ? "is-focused" : ""}`}>
-            <label className="field-label">Specialty</label>
-            <div className="input-wrap">
-              <input
-                className="field-input"
-                name="specialty"
-                value={form.specialty}
-                onChange={handleChange}
-                onFocus={() => setFocused("specialty")}
-                onBlur={() => setFocused("")}
-                placeholder="e.g. Cardiology"
-                required
-              />
-              <div className="field-line" />
-            </div>
-          </div>
-
-          <div className={`field ${focused === "phone" ? "is-focused" : ""}`}>
-            <label className="field-label">Phone Number</label>
-            <div className="input-wrap">
-              <input
-                className="field-input"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                onFocus={() => setFocused("phone")}
-                onBlur={() => setFocused("")}
-                placeholder="+1 000 000 0000"
-              />
-              <div className="field-line" />
-            </div>
-          </div>
-
-          <div className={`field ${focused === "email" ? "is-focused" : ""}`}>
-            <label className="field-label">Email Address</label>
-            <div className="input-wrap">
-              <input
-                className="field-input"
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                onFocus={() => setFocused("email")}
-                onBlur={() => setFocused("")}
-                placeholder="doctor@hospital.com"
-              />
-              <div className="field-line" />
-            </div>
-          </div>
-
-          <button type="submit" className="btn">
-            Save Doctor →
+          ))}
+          <button type="submit" className="btn" disabled={loading}>
+            {loading ? "Saving..." : "Save Doctor →"}
           </button>
         </form>
       </div>
